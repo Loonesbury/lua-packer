@@ -23,7 +23,7 @@
 		s[N]	fixed-length string; if N isn't given, reads until EOF
 		p[N]	string prefixed with N-byte length (default: N=2)
 
-		x[N,V]	N bytes of 'V' (default: N=1, V=0)
+		x[N,V]	N bytes of `V' (default: N=1, V=0)
 */
 #include <stdio.h>
 #include <stdint.h>
@@ -66,8 +66,7 @@ union {
 	uint8_t little;
 } hostendian = {1};
 
-/* read number from `str`, increment pointer */
-/* if no number present, returns `defaultsize' */
+/* read number, increment pointer */
 static size_t read_number(const char **str, size_t defaultsize)
 {
 	const char *s = *str;
@@ -104,17 +103,6 @@ static void swap_endian(void *p, size_t sz)
 		bytes[j] = swp;
 	}
 }
-
-/*
-#define PACK_REALIGN()\
-{\
-	if (pos % alignment) {\
-		int added = alignment - pos % alignment;\
-		luaL_addlstring(buf, alignbuf, added);\
-		pos += added;\
-	}\
-}
-*/
 
 /*
 * suppose we pack an int32 as an int24:
@@ -154,7 +142,7 @@ static void swap_endian(void *p, size_t sz)
 static int l_pack(lua_State *L)
 {
 	const char *f, *fend;
-	unsigned int argi = 2, pos = 0 /*, alignment = 1*/;
+	unsigned int argi = 2, pos = 0;
 	size_t size, fmtlen;
 	char c, little = hostendian.little;
 	luaL_Buffer buf_, *buf;
@@ -174,14 +162,6 @@ static int l_pack(lua_State *L)
 			case '<': little = 1; break;
 			case '>': little = 0; break;
 			case '=': little = hostendian.little; break;
-			/* case '!': {
-				alignment = read_number(&f, 1);
-				if (alignment == 0)
-					alignment = 1;
-				if (alignment > sizeof(alignbuf))
-					luaL_error(L, "'%c%d': alignment too large", c, alignment);
-				break;
-			} */
 
 			/* char (for convenience) */
 			case 'c':
@@ -314,12 +294,7 @@ static int l_pack(lua_State *L)
 				pos += size;
 				break;
 			}
-			/* alignment snap */
-			/* case 'X':
-				size = read_number(&f, 0);
-				if (size > 1)
-					PACK_REALIGN(size);
-				break; */
+			/* padding */
 			case ' ':
 				break;
 			default:
@@ -329,13 +304,6 @@ static int l_pack(lua_State *L)
 
 	luaL_pushresult(buf);
 	return 1;
-}
-
-#define UNPACK_REALIGN() {\
-	int misaligned = pos % alignment;\
-	if (misaligned) {\
-		d += alignment - misaligned;\
-	}\
 }
 
 #define CHECK_DATA(size) {\
@@ -399,14 +367,6 @@ static int l_unpack(lua_State *L)
 			case '<': little = 1; break;
 			case '>': little = 0; break;
 			case '=': little = hostendian.little; break;
-			/* case '!': {
-				alignment = read_number(&f, 1);
-				if (alignment == 0)
-					alignment = 1;
-				if (alignment > sizeof(alignbuf))
-					luaL_error(L, "'%c%d': alignment too large", c, alignment);
-				break;
-			} */
 
 			/* char (for convenience) */
 			case 'c':
@@ -491,9 +451,6 @@ static int l_unpack(lua_State *L)
 				d += size;
 				break;
 			}
-			/* alignment snap */
-			/* case 'X':
-				break; */
 			case ' ':
 				break;
 			default:
