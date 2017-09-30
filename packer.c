@@ -1,5 +1,5 @@
 /*
-	yet another string-packing lib for Lua 5.1
+	yet another string-packing lib for Lua 5.1 & 5.2
 	compiles with -std=c89 -Wall on GCC 6.3.0, somehow.
 
 	funcs:
@@ -516,7 +516,11 @@ static const luaL_Reg packlib[] = {
 
 int luaopen_packer(lua_State *L)
 {
+#if LUA_VERSION_NUM >= 502
+	luaL_newlib(L, packlib);
+#else
 	lua_createtable(L, 0, 3);
 	luaL_register(L, NULL, packlib);
+#endif
 	return 1;
 }
