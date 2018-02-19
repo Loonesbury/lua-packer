@@ -294,8 +294,11 @@ static int l_pack(lua_State *L)
 				pos += size;
 				break;
 			}
-			/* padding */
+
 			case ' ':
+			case '\t':
+			case '\r':
+			case '\n':
 				break;
 			default:
 				luaL_error(L, "invalid format specifier '%c'", c);
