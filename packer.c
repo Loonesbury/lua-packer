@@ -184,8 +184,8 @@ static int l_pack(lua_State *L)
 			CASE_PACKNUMBER('L', v.u32, 2)
 
 			/* floats */
-			CASE_PACKNUMBER('f', v.f, 4);
-			CASE_PACKNUMBER('d', v.d, 8);
+			CASE_PACKNUMBER('f', v.f, 4)
+			CASE_PACKNUMBER('d', v.d, 8)
 
 			/* ints gots to be DIFFERENT */
 			case 'i':
